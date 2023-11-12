@@ -17,7 +17,11 @@ const getDocument = (string, caller) => {
 
 	const path = extractPathDetails(string, caller)
 
-	if (path.type === "directory") {
+	if (path.type === "file") {
+		const data = readFileSync(path.absolute)
+
+		return data.toString()
+	} else if (path.type === "directory") {
 		// check for index.html, then check for any html/xml files. If a singular file exists,
 		// use that one.
 
@@ -28,17 +32,13 @@ const getDocument = (string, caller) => {
 			const file = platform === "win32" ? files[i].toLowerCase() : files[i]
 
 			if (/^index\.html$/i.test(file))
-				return getDocument(`${path.absolute}${sep}${file}`)
+				return getDocument(`${path.absolute}${sep}${file}`, caller)
 			if (/\.(html|xml)$/i.test(file)) matches[matches.length] = file
 		}
 
 		if (matches.length !== 1) return undefined
 
-		return getDocument(`${path.absolute}${sep}${matches[0]}`)
-	} else if (path.type === "file") {
-		const data = readFileSync(path.absolute)
-
-		return data.toString()
+		return getDocument(`${path.absolute}${sep}${matches[0]}`, caller)
 	} else {
 		// check to see if there's a file with an html/xml extension that matches the filename
 		// of the path provided.
