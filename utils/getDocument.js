@@ -7,14 +7,15 @@ import extractPathDetails from "./extractPathDetails.js"
  * Attempts to find and return the data from the given path. Will attempt
  * to coerce the filename with the .html and .xml extensions.
  *
- * @param {String} string
+ * @param {String} string The absolute, relative, or pseudo-path to find
+ * @param {String} caller The calling file in which to use for relative paths
  * @returns {String|undefined} The stringified data from the found document
  */
-const getDocument = string => {
+const getDocument = (string, caller) => {
 	if (typeof string !== "string")
 		throw new Error(`Expected string to be a string.`)
 
-	const path = extractPathDetails(string)
+	const path = extractPathDetails(string, caller)
 
 	if (path.type === "directory") {
 		// check for index.html, then check for any html/xml files. If a singular file exists,

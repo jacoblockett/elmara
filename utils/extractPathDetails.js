@@ -1,18 +1,26 @@
 import { existsSync, statSync } from "node:fs"
-import { resolve, dirname, basename, extname } from "node:path"
+import { resolve, dirname, basename, extname, isAbsolute, sep } from "node:path"
 import { platform } from "node:process"
 
 /**
  * Extracts the directory base and filename of the given path.
  *
- * @param {String} string
+ * @param {String} path
+ * @param {String} caller The calling file in which to use for relative paths
  * @returns {{absolute: String, directory: String, filename: String, extension: String, type: String|undefined}}
  */
-const extractPathDetails = string => {
-	if (typeof string !== "string")
-		throw new Error(`Expected string to be a string.`)
+const extractPathDetails = (path, caller) => {
+	if (typeof path !== "string") throw new Error(`Expected path to be a string.`)
+	if (typeof caller !== "string")
+		throw new Error(`Expected caller to be a string.`)
 
-	const absolute = resolve(platform === "win32" ? string.toLowerCase() : string)
+	let absolute
+	if (isAbsolute(path)) {
+		absolute = platform === "win32" ? path.toLowerCase() : path
+	} else {
+		return extractPathDetails(`${caller}${sep}${basename(path)}`, "")
+	}
+
 	const directory = dirname(absolute)
 	const filename = basename(absolute)
 	const extension = extname(filename)
